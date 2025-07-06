@@ -94,7 +94,6 @@ PAYWALL_KEYWORDS = ['paywall', 'subscription', 'premium', 'locked', 'member-only
 
 def clean_livelaw_content(soup):
     """Remove paywall and unwanted elements"""
-    # Comprehensive list of unwanted selectors
     unwanted_selectors = [
         '.td-a-rec', '.advertisement', '[class*="ad-"]', '[id*="ad-"]',
         '.td-a-rec-img', '.td-a-rec-id-', '.td-adspot-title',
@@ -113,12 +112,10 @@ def clean_livelaw_content(soup):
         '.tds-lock-content', '.td-subscription-box'
     ]
     
-    # Remove unwanted elements
     for selector in unwanted_selectors:
         for element in soup.select(selector):
             element.decompose()
     
-    # Remove paywall keywords
     paywall_selectors = [
         f'div[class*="{kw}"]' for kw in PAYWALL_KEYWORDS
     ] + [
@@ -131,7 +128,6 @@ def clean_livelaw_content(soup):
         for element in soup.select(selector):
             element.decompose()
     
-    # Remove scripts and styles with paywall content
     for tag in soup.find_all(['script', 'style']):
         if tag.string and any(kw in tag.string.lower() for kw in PAYWALL_KEYWORDS):
             tag.decompose()
@@ -155,18 +151,15 @@ def extract_structured_data(soup):
 
 def extract_article_title(soup):
     """Extract article title with multiple fallbacks"""
-    # LiveLaw specific selectors
     title = soup.select_one('h1.entry-title')
     if title:
         return title.get_text().strip()
     
-    # Try other common selectors
     for selector in ['h1.headline', 'h1.title', 'h1.article-title', 'h1.post-title']:
         title = soup.select_one(selector)
         if title:
             return title.get_text().strip()
     
-    # Meta tags
     og_title = soup.find('meta', property='og:title')
     if og_title and og_title.get('content'):
         return og_title['content'].strip()
@@ -175,10 +168,8 @@ def extract_article_title(soup):
     if twitter_title and twitter_title.get('content'):
         return twitter_title['content'].strip()
     
-    # Page title
     if soup.title and soup.title.string:
         title_text = soup.title.string.strip()
-        # Remove site name if present
         if ' - LiveLaw' in title_text:
             title_text = title_text.replace(' - LiveLaw', '')
         return title_text
@@ -189,7 +180,6 @@ def extract_download_links(soup, base_url):
     """Extract all potential download links with multiple strategies"""
     download_links = []
     
-    # Strategy 1: Anchor text patterns
     download_keywords = [
         'click here to read/download',
         'download order',
@@ -211,78 +201,64 @@ def extract_download_links(soup, base_url):
                 absolute_url = urljoin(base_url, href)
                 download_links.append(absolute_url)
     
-    # Strategy 2: PDF links in content
     for a_tag in soup.select('a[href$=".pdf"]'):
         href = a_tag.get('href')
         if href:
             absolute_url = urljoin(base_url, href)
             download_links.append(absolute_url)
     
-    # Strategy 3: Structured data (PDF links in metadata)
     for link_tag in soup.find_all('link', {'type': 'application/pdf'}):
         href = link_tag.get('href')
         if href:
             absolute_url = urljoin(base_url, href)
             download_links.append(absolute_url)
     
-    # Strategy 4: Button classes that indicate downloads
     for button in soup.select('.download-btn, .btn-download, .pdf-button'):
         href = button.get('href')
         if href:
             absolute_url = urljoin(base_url, href)
             download_links.append(absolute_url)
     
-    # Remove duplicates and return
     return list(set(download_links))
 
 def extract_article_content(soup, url):
     """Enhanced content extraction with strict filtering"""
-    
-    # Clean unwanted elements first
     clean_soup = clean_livelaw_content(soup)
-    
-    # Extract download links
     download_links = extract_download_links(clean_soup, url)
     
-    # Primary content selectors (most specific first)
     content_selectors = [
-        '.td-post-content .td-pb-span8 .td-pb-padding-side',  # Very specific LiveLaw
-        '.td-post-content .td-pb-span8',                      # LiveLaw main content
-        '.td-post-content',                                   # LiveLaw general
-        'article .entry-content',                             # Standard article
-        '.entry-content',                                     # WordPress standard
-        '.article-content',                                   # Generic article
-        '.post-content',                                      # Blog content
-        'main article',                                       # HTML5 semantic
-        '[role="main"] article'                               # ARIA main
+        '.td-post-content .td-pb-span8 .td-pb-padding-side',
+        '.td-post-content .td-pb-span8',
+        '.td-post-content',
+        'article .entry-content',
+        '.entry-content',
+        '.article-content',
+        '.post-content',
+        'main article',
+        '[role="main"] article'
     ]
     
     for selector in content_selectors:
         content = clean_soup.select_one(selector)
         if content:
-            # Additional cleanup within found content
             for unwanted in content.select('.td-a-rec, .advertisement, [class*="ad-"], .related'):
                 unwanted.decompose()
             
-            # Extract only paragraphs (main text content)
             paragraphs = content.find_all('p')
             valid_paragraphs = []
             
             for p in paragraphs:
                 text = p.get_text().strip()
                 
-                # Filter criteria for valid paragraphs
                 if (text and 
-                    len(text) > 30 and  # Minimum length
-                    len(text) < 2000 and  # Maximum length (avoid huge blocks)
+                    len(text) > 30 and
+                    len(text) < 2000 and
                     not text.lower().startswith(('advertisement', 'sponsored', 'read also', 'also read')) and
                     not any(keyword in text.lower() for keyword in 
                            ['subscribe', 'newsletter', 'follow us', 'social media', 'share this', 'like us'])):
                     valid_paragraphs.append(p)
             
-            # Only return if we have substantial content
-            if len(valid_paragraphs) >= 3:  # At least 3 valid paragraphs
-                # Create clean content with only valid paragraphs
+            if len(valid_paragraphs) >= 3:
                 clean_content = BeautifulSoup('<div></div>', 'html.parser')
                 for p in valid_paragraphs:
                     clean_content.div.append(p)
@@ -295,10 +271,7 @@ def format_article_content(content, soup, url):
     if not content:
         return {"error": "No content found"}
 
-    # Extract title
     title_text = extract_article_title(soup)
-    
-    # Parse content and extract clean text
     content_soup = BeautifulSoup(content, 'html.parser')
     paragraphs = content_soup.find_all('p')
     
@@ -307,12 +280,11 @@ def format_article_content(content, soup, url):
     
     for p in paragraphs:
         text = p.get_text().strip()
-        if text and len(text) > 30:  # Valid paragraph
+        if text and len(text) > 30:
             formatted_paragraphs.append(text)
             word_count += len(text.split())
             
-            # Limit total content length
-            if word_count > 2000:  # Maximum 2000 words
+            if word_count > 2000:
                 break
     
     if not formatted_paragraphs:
@@ -336,31 +308,24 @@ def bypass_livelaw_paywall(url):
         
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Extract download links
             download_links = extract_download_links(soup, url)
             
-            # Try structured data first
             structured_content = extract_structured_data(soup)
             if structured_content:
-                # Create a simple paragraph structure for structured data
                 formatted_content = f"<div><p>{structured_content}</p></div>"
                 result = format_article_content(formatted_content, soup, url)
                 if 'error' not in result:
                     result['download_links'] = download_links
                 return result
             
-            # Extract main content
             content, content_download_links = extract_article_content(soup, url)
             if content:
                 result = format_article_content(content, soup, url)
                 if 'error' not in result:
-                    # Combine all found download links
                     all_download_links = list(set(download_links + content_download_links))
                     result['download_links'] = all_download_links
                 return result
         
-        # Archive fallback
         archive_content = extract_from_archive(url)
         if archive_content:
             archive_soup = BeautifulSoup(archive_content, 'html.parser')
@@ -368,7 +333,6 @@ def bypass_livelaw_paywall(url):
             if content:
                 result = format_article_content(content, archive_soup, url)
                 if 'error' not in result:
-                    # Extract additional links from archive version
                     archive_download_links = extract_download_links(archive_soup, url)
                     all_download_links = list(set(result.get('download_links', []) + 
                                                 content_download_links + 
@@ -384,27 +348,22 @@ def bypass_livelaw_paywall(url):
 def extract_actual_url_from_google_redirect(google_url):
     """Extract the actual URL from Google's redirect URL"""
     try:
-        # Parse the Google redirect URL
         parsed = urllib.parse.urlparse(google_url)
         
-        # Check if it's a Google redirect URL
         if 'google.com' in parsed.netloc and '/url' in parsed.path:
-            # Extract query parameters
             query_params = urllib.parse.parse_qs(parsed.query)
             
-            # The actual URL is in the 'q' parameter
             if 'q' in query_params:
                 actual_url = query_params['q'][0]
                 return actual_url
         
-        # If not a Google redirect, return the original URL
         return google_url
         
     except Exception as e:
         print(f"Error extracting URL from Google redirect: {e}")
         return google_url
 
-# ===================== FLASK ROUTES WITH CSE INTEGRATION =====================
+# ===================== FLASK ROUTES =====================
 @app.route('/')
 def index():
     return render_template('index.html', 
@@ -429,21 +388,15 @@ def redirect_to_bypass():
     if not target_url:
         return redirect('/')
     
-    # URL decode if needed
     target_url = urllib.parse.unquote(target_url)
-    
-    # Extract actual URL from Google redirect URL
     actual_url = extract_actual_url_from_google_redirect(target_url)
     
     print(f"Original URL: {target_url}")
     print(f"Extracted URL: {actual_url}")
     
-    # Check if it's a LiveLaw URL
     if actual_url and 'livelaw.in' in actual_url.lower():
-        # Redirect to bypass route with the actual URL
         return redirect(f'/bypass?url={urllib.parse.quote(actual_url)}')
     else:
-        # For non-LiveLaw URLs, redirect to original URL
         return redirect(actual_url if actual_url else target_url)
 
 @app.route('/bypass', methods=['GET', 'POST'])
@@ -461,14 +414,12 @@ def bypass():
                                cse_id=GOOGLE_CSE_ID,
                                current_date=datetime.now().strftime("%d %B %Y"))
     
-    # Enhanced URL validation for LiveLaw
     if 'livelaw.in' not in url.lower():
         return render_template('index.html', 
                                error="Only LiveLaw URLs supported",
                                cse_id=GOOGLE_CSE_ID,
                                current_date=datetime.now().strftime("%d %B %Y"))
     
-    # Add referrer information for better bypass
     if request.referrer:
         print(f"Bypassing URL: {url} (referred from: {request.referrer})")
     
@@ -478,7 +429,7 @@ def bypass():
         return render_template('index.html', 
                                error=error_msg,
                                cse_id=GOOGLE_CSE_ID,
-                               original_url=url,  # Pass original URL for retry
+                               original_url=url,
                                current_date=datetime.now().strftime("%d %B %Y"))
     
     return render_template('article.html', 
@@ -486,6 +437,5 @@ def bypass():
                            url=url,
                            current_date=datetime.now().strftime("%d %B %Y"))
 
-# Vercel serverless function handler
+# Vercel handler
 app = app
-
