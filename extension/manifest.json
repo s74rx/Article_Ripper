@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "LiveLaw API Capture",
+  "version": "1.0",
+  "permissions": [
+    "webRequest",
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://www.livelaw.in/*",
+    "*://*.google.com/*",
+    "*://*.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
+

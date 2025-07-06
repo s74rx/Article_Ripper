@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Extracted - LiveLaw Extractor</title>
+    <style>
+        /* Same styles as the main page */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #27ae60;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            font-weight: 400;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+            padding: 30px;
+        }
+        
+        .article-header {
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 25px;
+        }
+        
+        .article-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .article-meta {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .article-content {
+            line-height: 1.8;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            white-space: pre-line;
+        }
+        
+        .download-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .download-title {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .download-links {
+            list-style-type: none;
+        }
+        
+        .download-links li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .download-links li:last-child {
+            border-bottom: none;
+        }
+        
+        .download-links a {
+            color: var(--secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .download-links a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 20px;
+            border: 1px solid var(--secondary);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 20px 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">LiveLaw Extractor</div>
+            <div class="subtitle">Extract and process legal articles with advanced link interception</div>
+        </header>
+        
+        <div class="card">
+            <div class="article-header">
+                <h1 class="article-title">{{ article.title }}</h1>
+                <div class="article-meta">
+                    <span>Word Count: {{ article.word_count }}</span>
+                    <span>Read Time: {{ article.read_time }} min</span>
+                </div>
+            </div>
+            
+            <div class="article-content">
+                {{ article.content }}
+            </div>
+            
+            {% if article.download_links %}
+            <div class="download-section">
+                <h3 class="download-title">Download Links</h3>
+                <ul class="download-links">
+                    {% for link in article.download_links %}
+                    <li><a href="{{ link }}" target="_blank">{{ link }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            <a href="/" class="back-btn">← Back to Extractor</a>
+        </div>
+        
+        <div class="footer">
+            LiveLaw Extractor &copy; {{ current_date }} | Advanced Legal Article Processing
+        </div>
+    </div>
+</body>
+</html>

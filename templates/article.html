@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }} - LiveLaw Bypass</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 2px solid #e1e8ed;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 25px 20px;
+            border-bottom: 3px solid #34495e;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .home-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 10px 20px;
+            border: 2px solid #20c997;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .home-btn:hover {
+            background: linear-gradient(135deg, #20c997, #17a2b8);
+            transform: translateY(-3px);
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .article-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+        }
+
+        .meta-item {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .article-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .article-content {
+            padding: 25px 20px;
+        }
+
+        .source-url {
+            background: #d1ecf1;
+            border: 2px solid #bee5eb;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 20px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #0c5460;
+        }
+
+        .content-text {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .content-text p {
+            margin-bottom: 18px;
+            font-size: 1.05rem;
+            color: #2c3e50;
+            text-align: justify;
+            line-height: 1.7;
+        }
+
+        .content-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .downloads-section {
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .downloads-title {
+            color: #155724;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .download-item {
+            background: white;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 18px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .download-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.2);
+            border-color: #1e7e34;
+        }
+
+        .download-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .download-icon {
+            font-size: 1.4rem;
+            color: #28a745;
+        }
+
+        .download-text {
+            font-weight: 600;
+            color: #155724;
+            font-size: 0.95rem;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        .download-btn:hover {
+            background: linear-gradient(135deg, #1e7e34, #155724);
+            color: white;
+            text-decoration: none;
+            transform: scale(1.05);
+        }
+
+        .article-stats {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #856404;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 18px;
+            border-top: 3px solid #34495e;
+            font-size: 0.9rem;
+        }
+
+        /* Floating Home Button for Mobile */
+        .floating-home {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 20px rgba(40, 167, 69, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .floating-home:hover {
+            transform: scale(1.1);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* ENHANCED: Mobile Optimization */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                border-radius: 15px;
+                margin: 0;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .header-top {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .nav-buttons {
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .home-btn, .back-btn {
+                flex: 1;
+                justify-content: center;
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .article-title {
+                font-size: 1.6rem;
+                text-align: center;
+                margin-top: 10px;
+            }
+
+            .article-meta {
+                justify-content: center;
+                gap: 8px;
+                font-size: 0.8rem;
+            }
+
+            .meta-item {
+                padding: 3px 8px;
+            }
+            
+            .article-content {
+                padding: 20px 15px;
+            }
+
+            .source-url {
+                padding: 10px;
+                font-size: 0.8rem;
+                margin-bottom: 15px;
+            }
+
+            .content-text {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .content-text p {
+                font-size: 1rem;
+                margin-bottom: 15px;
+                line-height: 1.6;
+                text-align: left;
+            }
+
+            .downloads-section {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .downloads-title {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+            
+            .download-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .download-item {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+                padding: 15px;
+            }
+
+            .download-info {
+                justify-content: center;
+            }
+
+            .download-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 10px 20px;
+            }
+
+            .article-stats {
+                padding: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+            }
+
+            .stat-value {
+                font-size: 1.2rem;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+            }
+
+            .footer {
+                padding: 15px;
+                font-size: 0.85rem;
+            }
+
+            .floating-home {
+                display: flex;
+                bottom: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 480px) {
+            .header {
+                padding: 15px 10px;
+            }
+
+            .article-title {
+                font-size: 1.4rem;
+            }
+
+            .article-content {
+                padding: 15px 10px;
+            }
+
+            .content-text, .downloads-section, .article-stats {
+                padding: 15px;
+            }
+
+            .downloads-title {
+                font-size: 1.1rem;
+            }
+
+            .content-text p {
+                font-size: 0.95rem;
+            }
+
+            .source-url {
+                font-size: 0.75rem;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .home-btn, .back-btn {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+        }
+
+        /* Landscape mobile optimization */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .header {
+                padding: 15px;
+            }
+
+            .article-title {
+                font-size: 1.5rem;
+            }
+
+            .header-top {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .nav-buttons {
+                flex-direction: row;
+            }
+
+            .floating-home {
+                bottom: 10px;
+                right: 10px;
+                width: 45px;
+                height: 45px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <div class="nav-buttons">
+                    <a href="/" class="home-btn">
+                        <i class="fas fa-home"></i>
+                        Home
+                    </a>
+                    <a href="javascript:history.back()" class="back-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back
+                    </a>
+                </div>
+                <div class="article-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        {{ current_date }}
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        ~{{ article.read_time }} min
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-file-word"></i>
+                        {{ article.word_count }} words
+                    </div>
+                </div>
+            </div>
+            <h1 class="article-title">{{ article.title }}</h1>
+        </div>
+
+        <div class="article-content">
+            <div class="source-url">
+                <strong><i class="fas fa-link"></i> Source:</strong> {{ url }}
+            </div>
+
+            <div class="content-text">
+                {% for paragraph in article.content.split('\n\n') %}
+                    {% if paragraph.strip() %}
+                        <p>{{ paragraph.strip() }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if article.download_links %}
+            <div class="downloads-section">
+                <h2 class="downloads-title">
+                    <i class="fas fa-download"></i>
+                    Legal Documents Available
+                </h2>
+                <div class="download-grid">
+                    {% for link in article.download_links %}
+                    <div class="download-item">
+                        <div class="download-info">
+                            <i class="fas fa-file-pdf download-icon"></i>
+                            <span class="download-text">Document {{ loop.index }}</span>
+                        </div>
+                        <a href="{{ link }}" target="_blank" class="download-btn">
+                            <i class="fas fa-external-link-alt"></i>
+                            Open
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="article-stats">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ article.word_count }}</div>
+                        <div class="stat-label">Words</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ article.read_time }}</div>
+                        <div class="stat-label">Minutes</div>
+                    </div>
+                    {% if article.download_links %}
+                    <div class="stat-item">
+                        <div class="stat-value">{{ article.download_links|length }}</div>
+                        <div class="stat-label">Documents</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><i class="fas fa-info-circle"></i> Content extracted for educational and research purposes only.</p>
+        </div>
+    </div>
+
+    <!-- Floating Home Button for Mobile -->
+    <a href="/" class="floating-home">
+        <i class="fas fa-home"></i>
+    </a>
+</body>
+</html>
+
