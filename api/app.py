@@ -440,6 +440,7 @@ def bypass():
     
 
 
+
 def enhance_paragraph_text(text):
     """Enhance individual paragraph with legal highlighting"""
     legal_patterns = [
@@ -540,6 +541,7 @@ def format_article_content(content, soup, url):
         'word_count': word_count,
         'read_time': max(1, word_count // 200)
     }
+
 
 # Vercel handler
 app = app
