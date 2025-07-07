@@ -148,19 +148,29 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
 
+        .content-text.enhanced-content {
+            line-height: 1.9;
+        }
+
         .content-text.enhanced-content p {
-            margin-bottom: 20px;
-            font-size: 1.05rem;
-            color: #2c3e50;
+            margin-bottom: 25px;
             text-align: justify;
+            text-indent: 25px;
+            font-size: 1.1rem;
+            color: #2c3e50;
             line-height: 1.8;
-            text-indent: 20px;
         }
 
         .content-text.enhanced-content p:first-child {
             text-indent: 0;
-            font-weight: 500;
-            font-size: 1.1rem;
+            font-weight: 600;
+            font-size: 1.15rem;
+            color: #1a252f;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 8px;
+            margin-bottom: 30px;
         }
 
         .content-text p {
@@ -267,6 +277,24 @@
         .legal-justice:hover {
             transform: scale(1.02);
             box-shadow: 0 2px 8px rgba(94, 53, 177, 0.3);
+        }
+
+        .legal-keyword {
+            background: linear-gradient(135deg, #ffecb3, #ffd54f);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            color: #f57f17;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            cursor: help;
+        }
+
+        .legal-keyword:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(245, 127, 23, 0.3);
         }
 
         .downloads-section {
@@ -492,8 +520,9 @@
             }
 
             .content-text.enhanced-content p:first-child {
-                font-size: 1rem;
-                font-weight: 500;
+                font-size: 1.05rem;
+                padding: 12px;
+                margin-bottom: 25px;
             }
 
             .downloads-section {
@@ -562,7 +591,7 @@
 
             /* Mobile legal citation adjustments */
             .legal-case-name, .legal-citation, .legal-section, 
-            .legal-article, .legal-court, .legal-act, .legal-justice {
+            .legal-article, .legal-court, .legal-act, .legal-justice, .legal-keyword {
                 padding: 1px 4px;
                 font-size: 0.9em;
             }
