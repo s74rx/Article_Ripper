@@ -138,13 +138,29 @@
             color: #0c5460;
         }
 
+        /* ENHANCED: Article Content with Legal Citation Highlighting */
         .content-text {
             background: #f8f9fa;
             border: 2px solid #dee2e6;
             border-radius: 15px;
-            padding: 25px;
+            padding: 30px;
             margin-bottom: 25px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .content-text.enhanced-content p {
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+            color: #2c3e50;
+            text-align: justify;
+            line-height: 1.8;
+            text-indent: 20px;
+        }
+
+        .content-text.enhanced-content p:first-child {
+            text-indent: 0;
+            font-weight: 500;
+            font-size: 1.1rem;
         }
 
         .content-text p {
@@ -157,6 +173,100 @@
 
         .content-text p:last-child {
             margin-bottom: 0;
+        }
+
+        /* Legal Citation Highlighting Styles */
+        .legal-case-name {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #1565c0;
+            border-left: 3px solid #2196f3;
+            transition: all 0.3s ease;
+            cursor: help;
+        }
+
+        .legal-case-name:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        }
+
+        .legal-citation {
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            color: #7b1fa2;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            cursor: help;
+        }
+
+        .legal-citation:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(123, 31, 162, 0.3);
+        }
+
+        .legal-section, .legal-article {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #2e7d32;
+            transition: all 0.3s ease;
+            cursor: help;
+        }
+
+        .legal-section:hover, .legal-article:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+        }
+
+        .legal-court {
+            background: linear-gradient(135deg, #fff3e0, #ffcc02);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #ef6c00;
+            transition: all 0.3s ease;
+            cursor: help;
+        }
+
+        .legal-court:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(239, 108, 0, 0.3);
+        }
+
+        .legal-act {
+            background: linear-gradient(135deg, #fce4ec, #f8bbd9);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #c2185b;
+            transition: all 0.3s ease;
+            cursor: help;
+        }
+
+        .legal-act:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(194, 24, 91, 0.3);
+        }
+
+        .legal-justice {
+            background: linear-gradient(135deg, #e8eaf6, #c5cae9);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #5e35b1;
+            transition: all 0.3s ease;
+            cursor: help;
+        }
+
+        .legal-justice:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(94, 53, 177, 0.3);
         }
 
         .downloads-section {
@@ -284,7 +394,6 @@
             font-size: 0.9rem;
         }
 
-        /* Floating Home Button for Mobile */
         .floating-home {
             position: fixed;
             bottom: 20px;
@@ -310,7 +419,7 @@
             text-decoration: none;
         }
 
-        /* ENHANCED: Mobile Optimization */
+        /* Mobile Optimization */
         @media (max-width: 768px) {
             body {
                 padding: 5px;
@@ -374,11 +483,17 @@
                 margin-bottom: 20px;
             }
 
-            .content-text p {
+            .content-text p, .content-text.enhanced-content p {
                 font-size: 1rem;
                 margin-bottom: 15px;
                 line-height: 1.6;
                 text-align: left;
+                text-indent: 0;
+            }
+
+            .content-text.enhanced-content p:first-child {
+                font-size: 1rem;
+                font-weight: 500;
             }
 
             .downloads-section {
@@ -444,9 +559,15 @@
                 height: 50px;
                 font-size: 1.2rem;
             }
+
+            /* Mobile legal citation adjustments */
+            .legal-case-name, .legal-citation, .legal-section, 
+            .legal-article, .legal-court, .legal-act, .legal-justice {
+                padding: 1px 4px;
+                font-size: 0.9em;
+            }
         }
 
-        /* Extra small devices */
         @media (max-width: 480px) {
             .header {
                 padding: 15px 10px;
@@ -468,7 +589,7 @@
                 font-size: 1.1rem;
             }
 
-            .content-text p {
+            .content-text p, .content-text.enhanced-content p {
                 font-size: 0.95rem;
             }
 
@@ -491,7 +612,6 @@
             }
         }
 
-        /* Landscape mobile optimization */
         @media (max-width: 768px) and (orientation: landscape) {
             .header {
                 padding: 15px;
@@ -556,12 +676,16 @@
                 <strong><i class="fas fa-link"></i> Source:</strong> {{ url }}
             </div>
 
-            <div class="content-text">
-                {% for paragraph in article.content.split('\n\n') %}
-                    {% if paragraph.strip() %}
-                        <p>{{ paragraph.strip() }}</p>
-                    {% endif %}
-                {% endfor %}
+            <div class="content-text{% if article.enhanced_content %} enhanced-content{% endif %}">
+                {% if article.enhanced_content %}
+                    {{ article.content|safe }}
+                {% else %}
+                    {% for paragraph in article.content.split('\n\n') %}
+                        {% if paragraph.strip() %}
+                            <p>{{ paragraph.strip() }}</p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             </div>
 
             {% if article.download_links %}
@@ -612,10 +736,8 @@
         </div>
     </div>
 
-    <!-- Floating Home Button for Mobile -->
     <a href="/" class="floating-home">
         <i class="fas fa-home"></i>
     </a>
 </body>
 </html>
-
