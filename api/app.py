@@ -505,41 +505,186 @@ def clean_and_enhance_paragraphs(content):
     
     return '\n'.join(enhanced_paragraphs)
 
+import re
+from bs4 import BeautifulSoup
+
+def detect_paragraphs(text):
+    """Advanced paragraph detection with multiple strategies"""
+    
+    # Strategy 1: Split by double newlines
+    paragraphs = text.split('\n\n')
+    
+    # Strategy 2: Split by sentence patterns if no double newlines
+    if len(paragraphs) <= 2:
+        # Look for sentence endings followed by capital letters
+        sentences = re.split(r'(?<=[.!?])\s+(?=[A-Z])', text)
+        
+        # Group sentences into paragraphs (every 3-5 sentences)
+        paragraphs = []
+        current_para = []
+        
+        for sentence in sentences:
+            current_para.append(sentence.strip())
+            
+            # Create paragraph break conditions
+            if (len(current_para) >= 3 and len(' '.join(current_para)) > 200) or len(current_para) >= 5:
+                paragraphs.append(' '.join(current_para))
+                current_para = []
+        
+        # Add remaining sentences
+        if current_para:
+            paragraphs.append(' '.join(current_para))
+    
+    # Strategy 3: Split by legal document patterns
+    legal_break_patterns = [
+        r'\b(?:HELD|OBSERVED|DIRECTED|ORDERED):\s*',
+        r'\b(?:Facts|Background|Issue|Judgment|Decision):\s*',
+        r'\b(?:The Court|Supreme Court|High Court)\s+(?:held|observed|directed|noted)\b',
+    ]
+    
+    enhanced_paragraphs = []
+    for para in paragraphs:
+        para = para.strip()
+        if len(para) > 30:  # Filter out very short paragraphs
+            # Check for legal document breaks within paragraph
+            for pattern in legal_break_patterns:
+                if re.search(pattern, para, re.IGNORECASE):
+                    # Split at legal breaks
+                    parts = re.split(pattern, para, flags=re.IGNORECASE)
+                    for i, part in enumerate(parts):
+                        if part.strip() and len(part.strip()) > 30:
+                            enhanced_paragraphs.append(part.strip())
+                    break
+            else:
+                enhanced_paragraphs.append(para)
+    
+    return enhanced_paragraphs
+
+def enhance_legal_citations(text):
+    """Enhanced legal citation detection and highlighting"""
+    
+    # Comprehensive legal citation patterns
+    citation_patterns = [
+        # Case names - multiple formats
+        (r'\b([A-Z][A-Z\s@&\.]+\s+(?:Versus|V\.|v\.)\s+[A-Z][A-Z\s&\.]+(?:\s+(?:AND|&)\s+[A-Z][A-Z\s&\.]+)*)\b', 'case-name'),
+        (r'\b([A-Z][a-zA-Z\s]+\s+(?:v\.|vs\.)\s+[A-Z][a-zA-Z\s]+)\b', 'case-name'),
+        
+        # Citations and case numbers
+        (r'\b(\d{4}\s+LiveLaw\s+\([A-Z]+\)\s+\d+)\b', 'citation'),
+        (r'\b(\(\d{4}\)\s+\d+\s+SCC\s+\d+)\b', 'citation'),
+        (r'\b(AIR\s+\d{4}\s+[A-Z]{2,5}\s+\d+)\b', 'citation'),
+        (r'\b(SLP\([A-Za-z\.]+\)\s+No\.\s+\d+/\d{4})\b', 'citation'),
+        (r'\b(W\.P\.\([A-Za-z\.]+\)\s+No\.\s+\d+/\d{4})\b', 'citation'),
+        (r'\b(Diary\s+No\.\s+\d+[-/]\d{4})\b', 'citation'),
+        (r'\b(Criminal\s+Appeal\s+No\.\s+\d+/\d{4})\b', 'citation'),
+        
+        # Legal provisions
+        (r'\b(Section\s+\d+[A-Z]*(?:\(\d+\))?(?:\s+of\s+[A-Za-z\s,]+)?)\b', 'section'),
+        (r'\b(Article\s+\d+[A-Z]*(?:\s+of\s+the\s+Constitution)?)\b', 'article'),
+        (r'\b(Rule\s+\d+[A-Z]*)\b', 'section'),
+        
+        # Courts and judicial authorities
+        (r'\b(Supreme\s+Court(?:\s+of\s+India)?)\b', 'court'),
+        (r'\b([A-Z][a-zA-Z\s]+\s+High\s+Court)\b', 'court'),
+        (r'\b(District\s+Court)\b', 'court'),
+        (r'\b(Chief\s+Justice|Justice[s]?\s+[A-Z][a-zA-Z\s\.]+(?:\s+and\s+Justice[s]?\s+[A-Z][a-zA-Z\s\.]+)*)\b', 'justice'),
+        
+        # Acts and statutes
+        (r'\b([A-Z][a-zA-Z\s,()]+(?:Act|Code|Rules),?\s+\d{4})\b', 'act'),
+        (r'\b(Indian\s+Penal\s+Code|IPC|CrPC|Code\s+of\s+Criminal\s+Procedure)\b', 'act'),
+        (r'\b(Constitution\s+of\s+India)\b', 'act'),
+        
+        # Legal keywords
+        (r'\b(HELD|OBSERVED|DIRECTED|ORDERED|JUDGMENT|DECISION)\b', 'legal-keyword'),
+    ]
+    
+    enhanced_text = text
+    for pattern, css_class in citation_patterns:
+        enhanced_text = re.sub(
+            pattern,
+            f'<span class="legal-{css_class}">\\1</span>',
+            enhanced_text,
+            flags=re.IGNORECASE
+        )
+    
+    return enhanced_text
+
+def improve_readability(text):
+    """Improve text readability with proper formatting"""
+    
+    # Fix common formatting issues
+    text = re.sub(r'\s+', ' ', text)  # Normalize whitespace
+    text = re.sub(r'([.!?])\s*([A-Z])', r'\1 \2', text)  # Ensure space after sentences
+    text = re.sub(r'([a-z])([A-Z])', r'\1. \2', text)  # Add periods where missing
+    
+    # Ensure proper sentence endings
+    if not text.endswith(('.', '!', '?', ':')):
+        text += '.'
+    
+    # Capitalize first letter if not already
+    if text and text[0].islower():
+        text = text[0].upper() + text[1:]
+    
+    return text
+
 def format_article_content(content, soup, url):
-    """Enhanced format with legal citation highlighting"""
+    """Enhanced format with advanced paragraph detection and legal highlighting"""
     if not content:
         return {"error": "No content found"}
 
     title_text = extract_article_title(soup)
-    content_soup = BeautifulSoup(content, 'html.parser')
-    paragraphs = content_soup.find_all('p')
     
-    # Extract plain text paragraphs
-    text_paragraphs = []
-    word_count = 0
+    # Extract raw text content
+    if isinstance(content, str) and '<' in content:
+        # If content contains HTML, parse it
+        content_soup = BeautifulSoup(content, 'html.parser')
+        raw_text = content_soup.get_text()
+    else:
+        # If it's already plain text
+        content_soup = BeautifulSoup(content, 'html.parser')
+        paragraphs = content_soup.find_all('p')
+        raw_text = '\n\n'.join([p.get_text().strip() for p in paragraphs if p.get_text().strip()])
     
-    for p in paragraphs:
-        text = p.get_text().strip()
-        if text and len(text) > 30:
-            text_paragraphs.append(text)
-            word_count += len(text.split())
-            
-            if word_count > 2000:
-                break
-    
-    if not text_paragraphs:
+    if not raw_text or len(raw_text) < 100:
         return {"error": "No valid content extracted"}
     
-    # Join paragraphs and enhance with legal citations
-    plain_content = '\n\n'.join(text_paragraphs)
-    enhanced_content = clean_and_enhance_paragraphs(plain_content)
+    # Detect and clean paragraphs
+    detected_paragraphs = detect_paragraphs(raw_text)
+    
+    # Process each paragraph
+    enhanced_paragraphs = []
+    word_count = 0
+    
+    for para_text in detected_paragraphs:
+        if len(para_text.strip()) > 50:  # Only include substantial paragraphs
+            # Improve readability
+            cleaned_text = improve_readability(para_text.strip())
+            
+            # Add legal citation highlighting
+            enhanced_text = enhance_legal_citations(cleaned_text)
+            
+            # Wrap in paragraph tags
+            enhanced_paragraphs.append(f'<p>{enhanced_text}</p>')
+            
+            word_count += len(cleaned_text.split())
+            
+            # Limit total content
+            if word_count > 2500:
+                break
+    
+    if not enhanced_paragraphs:
+        return {"error": "No valid paragraphs detected"}
+    
+    # Join all enhanced paragraphs
+    final_content = '\n'.join(enhanced_paragraphs)
     
     return {
         'title': title_text,
-        'content': enhanced_content,
-        'enhanced_content': True,  # Flag for enhanced formatting
+        'content': final_content,
+        'enhanced_content': True,  # Critical flag for frontend
         'word_count': word_count,
-        'read_time': max(1, word_count // 200)
+        'read_time': max(1, word_count // 200),
+        'paragraph_count': len(enhanced_paragraphs)
     }
 
 
