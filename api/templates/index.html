@@ -115,10 +115,16 @@
             flex-wrap: wrap;
         }
 
-        .url-input {
+        /* ENHANCED: URL Input Container with Clear Button */
+        .url-input-container {
+            position: relative;
             flex: 1;
             min-width: 280px;
-            padding: 15px 20px;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 15px 45px 15px 20px; /* Extra padding for clear button */
             border: 2px solid #ddd;
             border-radius: 10px;
             font-size: 1rem;
@@ -131,6 +137,38 @@
             outline: none;
             border-color: #3498db;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        /* Clear Button Styling */
+        .clear-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: none; /* Hidden by default */
+            font-size: 14px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-btn:hover {
+            background: #f0f0f0;
+            color: #666;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .clear-btn.show {
+            display: flex;
         }
 
         .bypass-btn {
@@ -220,7 +258,7 @@
             font-size: 0.9rem;
         }
 
-        /* FIXED: Enhanced Google CSE Styling for Perfect Sizing */
+        /* Google CSE Styling */
         .gsc-control-cse {
             background: transparent !important;
             border: none !important;
@@ -294,47 +332,6 @@
             height: 18px !important;
         }
 
-        /* Force consistent height across all search elements */
-        .cse-container .gsc-search-box,
-        .cse-container .gsc-input-box,
-        .cse-container .gsc-input,
-        .url-form .url-input {
-            height: 55px !important;
-            box-sizing: border-box !important;
-        }
-
-        /* Override any Google inline styles */
-        .gsc-input-box[style] {
-            height: 55px !important;
-        }
-
-        .gsc-input[style] {
-            height: 55px !important;
-            line-height: normal !important;
-        }
-
-        /* Fix any Google CSE override issues */
-        .gsc-input-box table {
-            height: 100% !important;
-            width: 100% !important;
-        }
-
-        .gsc-input-box td {
-            padding: 0 !important;
-            height: 100% !important;
-        }
-
-        /* Remove any unwanted Google styling */
-        .gsc-input-box .gsc-input-box-hover,
-        .gsc-input-box .gsc-input-box-focus {
-            box-shadow: none !important;
-        }
-
-        /* Style CSE Results */
-        .gsc-results .gsc-cursor-box {
-            margin-top: 20px !important;
-        }
-
         .gsc-webResult {
             border: 2px solid #e9ecef !important;
             border-radius: 10px !important;
@@ -350,11 +347,6 @@
             transform: translateY(-2px) !important;
         }
 
-        .gsc-webResult .gsc-result {
-            padding: 0 !important;
-        }
-
-        /* Bypass indicator for LiveLaw results */
         .livelaw-result::before {
             content: "🔓 BYPASS AVAILABLE";
             background: #28a745;
@@ -366,7 +358,7 @@
             margin-right: 8px;
         }
 
-        /* ENHANCED: Mobile Optimization */
+        /* Mobile Optimization */
         @media (max-width: 768px) {
             body {
                 padding: 5px;
@@ -408,11 +400,21 @@
                 gap: 12px;
             }
             
-            .url-input {
+            .url-input-container {
                 min-width: unset;
                 width: 100%;
-                padding: 12px 15px;
+            }
+
+            .url-input {
+                padding: 12px 40px 12px 15px;
                 height: 50px;
+            }
+
+            .clear-btn {
+                right: 10px;
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
             }
 
             .bypass-btn {
@@ -459,7 +461,6 @@
             }
         }
 
-        /* Extra small devices */
         @media (max-width: 480px) {
             .header h1 {
                 font-size: 1.6rem;
@@ -521,12 +522,21 @@
                     Direct URL Bypass
                 </h2>
                 <form method="POST" action="/bypass" class="url-form">
-                    <input type="url" 
-                           name="url" 
-                           class="url-input" 
-                           placeholder="Enter LiveLaw article URL (e.g., https://www.livelaw.in/...)"
-                           required
-                           {% if search_query %}value="{{ search_query }}"{% endif %}>
+                    <div class="url-input-container">
+                        <input type="url" 
+                               name="url" 
+                               id="url-input"
+                               class="url-input" 
+                               placeholder="Enter LiveLaw article URL (e.g., https://www.livelaw.in/...)"
+                               required
+                               {% if search_query %}value="{{ search_query }}"{% endif %}>
+                        <button type="button" 
+                                class="clear-btn" 
+                                id="clear-btn"
+                                title="Clear URL">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                     <button type="submit" class="bypass-btn">
                         <i class="fas fa-unlock"></i>
                         Bypass Paywall
@@ -559,7 +569,36 @@
     </div>
 
     <script>
-        // Enhanced CSE result interception with multiple strategies
+        // Clear Button Functionality
+        const urlInput = document.getElementById('url-input');
+        const clearBtn = document.getElementById('clear-btn');
+
+        // Show/hide clear button based on input content
+        function toggleClearButton() {
+            if (urlInput.value.length > 0) {
+                clearBtn.classList.add('show');
+            } else {
+                clearBtn.classList.remove('show');
+            }
+        }
+
+        // Event listeners for clear button
+        urlInput.addEventListener('input', toggleClearButton);
+        urlInput.addEventListener('focus', toggleClearButton);
+
+        // Clear functionality
+        clearBtn.addEventListener('click', function() {
+            urlInput.value = '';
+            urlInput.focus();
+            clearBtn.classList.remove('show');
+        });
+
+        // Initialize clear button state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleClearButton();
+        });
+
+        // CSE Interception Logic (unchanged)
         let cseInterceptor = {
             init: function() {
                 this.interceptCSEResults();
@@ -567,11 +606,9 @@
             },
 
             interceptCSEResults: function() {
-                // Strategy 1: Intercept clicks on result links
                 document.addEventListener('click', function(e) {
                     const link = e.target.closest('a');
                     if (link && link.href) {
-                        // Check if it's a CSE result link
                         if (link.closest('.gsc-webResult') || link.classList.contains('gs-title')) {
                             e.preventDefault();
                             e.stopPropagation();
@@ -579,20 +616,17 @@
                             const originalUrl = link.href;
                             console.log('CSE result clicked:', originalUrl);
                             
-                            // Route through our redirect endpoint
                             window.location.href = '/redirect?url=' + encodeURIComponent(originalUrl);
                         }
                     }
-                }, true); // Use capture phase
+                }, true);
 
-                // Strategy 2: Periodic link modification
                 setInterval(() => {
                     this.modifyCSELinks();
                 }, 500);
             },
 
             modifyCSELinks: function() {
-                // Find all CSE result links
                 const cseLinks = document.querySelectorAll('.gsc-webResult a, .gs-title a, .gsc-result a');
                 
                 cseLinks.forEach(link => {
@@ -600,30 +634,25 @@
                         link.dataset.intercepted = 'true';
                         const originalHref = link.href;
                         
-                        // Add visual indicator for LiveLaw results
                         if (originalHref.includes('livelaw.in')) {
                             link.classList.add('livelaw-result');
                         }
                         
-                        // Override click behavior
                         link.addEventListener('click', function(e) {
                             e.preventDefault();
                             e.stopPropagation();
                             window.location.href = '/redirect?url=' + encodeURIComponent(originalHref);
                         });
                         
-                        // Also modify href as backup
                         link.href = '/redirect?url=' + encodeURIComponent(originalHref);
                     }
                 });
             },
 
             setupMutationObserver: function() {
-                // Watch for dynamically added CSE content
                 const observer = new MutationObserver((mutations) => {
                     mutations.forEach((mutation) => {
                         if (mutation.addedNodes.length > 0) {
-                            // Check if new CSE results were added
                             mutation.addedNodes.forEach((node) => {
                                 if (node.nodeType === Node.ELEMENT_NODE) {
                                     if (node.classList && (node.classList.contains('gsc-webResult') || 
@@ -636,7 +665,6 @@
                     });
                 });
 
-                // Start observing
                 observer.observe(document.body, {
                     childList: true,
                     subtree: true
@@ -644,17 +672,14 @@
             }
         };
 
-        // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             cseInterceptor.init();
         });
 
-        // Also initialize after a delay to catch late-loading CSE
         setTimeout(() => {
             cseInterceptor.init();
         }, 2000);
 
-        // Google CSE callback to ensure our interceptor runs after CSE loads
         window.__gcse = {
             callback: function() {
                 setTimeout(() => {
@@ -665,4 +690,3 @@
     </script>
 </body>
 </html>
-
