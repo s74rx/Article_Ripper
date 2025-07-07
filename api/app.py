@@ -10,6 +10,7 @@ from urllib3.util.retry import Retry
 from datetime import datetime
 from urllib.parse import urljoin
 from markupsafe import escape
+import re
 
 app = Flask(__name__)
 
@@ -436,6 +437,109 @@ def bypass():
                            article=result, 
                            url=url,
                            current_date=datetime.now().strftime("%d %B %Y"))
+    
+
+
+def enhance_paragraph_text(text):
+    """Enhance individual paragraph with legal highlighting"""
+    legal_patterns = [
+        # Case names (Party v Party or Party Versus Party)
+        (r'\b([A-Z][A-Z\s@&]+\s+(?:Versus|v\.)\s+[A-Z][A-Z\s&\.]+)\b', 'case-name'),
+        (r'\b([A-Z][a-zA-Z\s]+\s+v\.\s+[A-Z][a-zA-Z\s]+)\b', 'case-name'),
+        
+        # Citations (LiveLaw, SCC, etc.)
+        (r'\b(\d{4}\s+LiveLaw\s+\([A-Z]+\)\s+\d+)\b', 'citation'),
+        (r'\b(\(\d{4}\)\s+\d+\s+SCC\s+\d+)\b', 'citation'),
+        (r'\b(AIR\s+\d{4}\s+[A-Z]{2,5}\s+\d+)\b', 'citation'),
+        
+        # Case numbers
+        (r'\b(SLP\([A-Za-z]+\)\s+No\.\s+\d+/\d{4})\b', 'citation'),
+        (r'\b(W\.P\.\([A-Za-z\.]+\)\s+No\.\s+\d+/\d{4})\b', 'citation'),
+        (r'\b(Diary\s+No\.\s+\d+[-/]\d{4})\b', 'citation'),
+        
+        # Legal provisions
+        (r'\b(Section\s+\d+[A-Z]*(?:\(\d+\))?)\b', 'section'),
+        (r'\b(Article\s+\d+[A-Z]*)\b', 'article'),
+        
+        # Courts
+        (r'\b(Supreme\s+Court|High\s+Court|[A-Z][a-zA-Z\s]+\s+High\s+Court)\b', 'court'),
+        
+        # Acts and statutes
+        (r'\b([A-Z][a-zA-Z\s,()]+Act,?\s+\d{4})\b', 'act'),
+        
+        # Justice names
+        (r'\b(Justice[s]?\s+[A-Z][a-zA-Z\s]+(?:\s+and\s+[A-Z][a-zA-Z\s]+)?)\b', 'justice'),
+    ]
+    
+    enhanced_text = text
+    for pattern, css_class in legal_patterns:
+        enhanced_text = re.sub(
+            pattern,
+            f'<span class="legal-{css_class}">\\1</span>',
+            enhanced_text,
+            flags=re.IGNORECASE
+        )
+    
+    return enhanced_text
+
+def clean_and_enhance_paragraphs(content):
+    """Clean and enhance paragraphs with proper formatting"""
+    # Split by double newlines and clean
+    paragraphs = content.split('\n\n')
+    enhanced_paragraphs = []
+    
+    for para in paragraphs:
+        # Remove extra whitespace
+        para = ' '.join(para.split())
+        
+        # Skip very short paragraphs (likely fragments)
+        if len(para) > 50:
+            # Ensure proper sentence endings
+            if not para.endswith(('.', '!', '?', ':')):
+                para += '.'
+            
+            # Enhance with legal citation highlighting
+            enhanced_para = enhance_paragraph_text(para)
+            enhanced_paragraphs.append(f'<p>{enhanced_para}</p>')
+    
+    return '\n'.join(enhanced_paragraphs)
+
+def format_article_content(content, soup, url):
+    """Enhanced format with legal citation highlighting"""
+    if not content:
+        return {"error": "No content found"}
+
+    title_text = extract_article_title(soup)
+    content_soup = BeautifulSoup(content, 'html.parser')
+    paragraphs = content_soup.find_all('p')
+    
+    # Extract plain text paragraphs
+    text_paragraphs = []
+    word_count = 0
+    
+    for p in paragraphs:
+        text = p.get_text().strip()
+        if text and len(text) > 30:
+            text_paragraphs.append(text)
+            word_count += len(text.split())
+            
+            if word_count > 2000:
+                break
+    
+    if not text_paragraphs:
+        return {"error": "No valid content extracted"}
+    
+    # Join paragraphs and enhance with legal citations
+    plain_content = '\n\n'.join(text_paragraphs)
+    enhanced_content = clean_and_enhance_paragraphs(plain_content)
+    
+    return {
+        'title': title_text,
+        'content': enhanced_content,
+        'enhanced_content': True,  # Flag for enhanced formatting
+        'word_count': word_count,
+        'read_time': max(1, word_count // 200)
+    }
 
 # Vercel handler
 app = app
